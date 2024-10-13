@@ -49,6 +49,7 @@ function decrypt(text, key) {
         return decrypted;
     } catch {
         console.log('Error during decryption.');
+        return null;
     }
 }
 
@@ -171,7 +172,10 @@ app.get('/admin', (req, res) => {
             res.render('login', artParams);
         } else {
             const decryptedToken = JSON.parse(decrypt(xAuthToken, config['wikiSecretKey']));
-            if (isAdminLoginValid(decryptedToken.adminName, decryptedToken.adminPassword)) {
+            if (decryptedToken === null || !isAdminLoginValid(decryptedToken.adminName, decryptedToken.adminPassword)) {
+                res.clearCookie('x-auth-token');
+                res.redirect('/admin');
+            } else {
                 res.redirect('/admin/panel');
             }
         }
@@ -188,7 +192,8 @@ app.get('/admin/panel', (req, res) => {
             res.redirect('/admin');
         } else {
             const decryptedToken = JSON.parse(decrypt(xAuthToken, config['wikiSecretKey']));
-            if (!isAdminLoginValid(decryptedToken.adminName, decryptedToken.adminPassword)) {
+            if (decryptedToken === null || !isAdminLoginValid(decryptedToken.adminName, decryptedToken.adminPassword)) {
+                res.clearCookie('x-auth-token');
                 res.redirect('/admin');
             } else {
                 const artParams = {
@@ -218,7 +223,8 @@ app.get('/admin/articles', (req, res) => {
             res.redirect('/admin');
         } else {
             const decryptedToken = JSON.parse(decrypt(xAuthToken, config['wikiSecretKey']));
-            if (!isAdminLoginValid(decryptedToken.adminName, decryptedToken.adminPassword)) {
+            if (decryptedToken === null || !isAdminLoginValid(decryptedToken.adminName, decryptedToken.adminPassword)) {
+                res.clearCookie('x-auth-token');
                 res.redirect('/admin');
             } else {
                 const artParams = {
@@ -246,7 +252,8 @@ app.get('/admin/editor', (req, res) => {
             res.redirect('/admin');
         } else {
             const decryptedToken = JSON.parse(decrypt(xAuthToken, config['wikiSecretKey']));
-            if (!isAdminLoginValid(decryptedToken.adminName, decryptedToken.adminPassword)) {
+            if (decryptedToken === null || !isAdminLoginValid(decryptedToken.adminName, decryptedToken.adminPassword)) {
+                res.clearCookie('x-auth-token');
                 res.redirect('/admin');
             } else {
                 if (!id) {

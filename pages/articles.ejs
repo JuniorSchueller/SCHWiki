@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= lang['controlpanel'] %> - <%= wikiName %></title>
+    <link rel="shortcut icon" href="<%= wikiIcon %>" type="image/svg">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+        }
+
+        .sidebar {
+            background-color: #24292f;
+            width: 250px;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 1050;
+        }
+
+        .sidebar h1 {
+            color: #fff;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 10px;
+            color: #d1d5da;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #0366d6;
+            color: #fff;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .content-inner {
+            padding-top: 60px;
+        }
+
+        .ref {
+            font-size: small;
+            display: inline;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .ref:hover {
+            text-decoration: underline;
+        }
+
+        .top-navbar {
+            background-color: #0366d6;
+            color: #fff;
+            padding: 10px 20px;
+            position: fixed;
+            width: calc(100% - 250px);
+            top: 0;
+            left: 250px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #default {
+            color: white;
+            text-decoration: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0366d6;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+
+        button:hover {
+            background-color: #024d9f;
+        }
+
+        button.red {
+            background-color: #d60303;
+        }
+
+        button.red:hover {
+            background-color: #9f0202;
+        }
+
+        .article-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .article-list li {
+            background-color: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .article-list a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .article-list a:hover {
+            text-decoration: underline;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .actions a {
+            color: #0366d6;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .actions a:hover {
+            color: #024d9f;
+        }
+
+        .visitsCount {
+            color: #6a737d;
+            font-size: 0.9em;
+            margin-left: 5px;
+        }
+
+        .footer {
+            background-color: #f6f8fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e1e4e8;
+            position: fixed;
+            bottom: 0;
+            width: calc(100% - 250px);
+            left: 250px;
+        }
+
+        .footer img {
+            max-height: 30px;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1><%= wikiName %></h1>
+        <% articles.forEach(function(article) { %>
+            <a href="/wiki/<%= article.articleName %>">
+                <%= article.articleName %>
+            </a>
+        <% }); %>
+    </div>
+
+    <div class="top-navbar">
+        <div>
+            <h1><a href="/admin/panel" id="default"><%= lang['controlpanel'] %></a> - <%= lang['articles'] %></h1>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="content-inner"></div>
+        <h1><%= lang['articles'] %></h1>
+
+        <br>
+
+        <ul class="article-list">
+            <a href="/admin/editor"><button><%= lang['createarticle'] %></button><br><br></a>
+            <% for (let i = 0; i < articles.length; i++) { %>
+                <li class="article-item">
+                    <a href="/wiki/<%= articles[i].articleName %>">
+                        <%= articles[i].articleName %> <span class="visitsCount">(<%= articles[i].visits %> <%= lang['visits'].toLowerCase() %>)</span>
+                    </a>
+                    <div class="actions">
+                        <a href="/wiki/<%= articles[i].articleName %>" title="<%= lang['view'] %>">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/admin/editor?id=<%= i %>" title="<%= lang['edit'] %>">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="#" onclick="deleteArticle(parseInt('<%= i %>'))" title="<%= lang['delete'] %>">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </li>
+            <% }; %>
+        </ul>
+        <br><br>
+    </div>
+
+    <div class="footer">
+        <p>&copy; <%= lang['licensedunder'] %> <a href="<%= wikiLicenseURL %>"><%= wikiLicense %></a></p>
+        <a href="https://github.com/JuniorSchueller/SCHWiki"><img style="width: 88px;height: 31px;" src="/assets/PoweredBy_SCHWiki.png" alt="Powered by SCHWiki"></a>
+    </div>
+
+    <script>
+        function deleteArticle(id) {
+            const wasAccepted = window.confirm(`<%= lang['areyousure'] %> `);
+            if (!wasAccepted) return;
+            fetch('/admin/delete?id=' + id, {
+                method: 'POST'
+            })
+                .then(response => {
+                    location.reload();
+                })
+                .catch(() => {
+                    window.alert(`<%= lang['somethingbroke'] %>`)
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "schwiki",
+  "version": "1.0.0",
+  "description": "An easy to install wiki? SCHWiki.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [
+    "wiki",
+    "software",
+    "schwiki"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuniorSchueller/SCHWiki.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JuniorSchueller/SCHWiki/issues"
+  },
+  "homepage": "https://github.com/JuniorSchueller/SCHWiki#readme",
+  "author": "JuniorSchueller",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "crypto": "^1.0.1",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2"
+  }
+}

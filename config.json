@@ -1,0 +1,16 @@
+{
+    "wikiIcon": "/assets/SCHWiki_logo.svg",
+    "wikiName": "SCHWiki",
+    "wikiDescription": "An easy to install wiki? SCHWiki.",
+    "wikiLanguage": "en",
+    "wikiLicense": "CC BY-SA",
+    "wikiLicenseURL": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+    "wikiDatabaseURL": "https://<<db-name>>-default-rtdb.firebaseio.com",
+    "wikiSecretKey": "changethis",
+    "wikiAdmin": [
+        {
+            "userName": "admin",
+            "userPassword": "admin"
+        }
+    ]
+}

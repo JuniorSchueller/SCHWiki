@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= lang['adminlogin'] %> - <%= wikiName %></title>
+    <link rel="shortcut icon" href="<%= wikiIcon %>" type="image/svg">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f6f8fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .login-container {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #e1e4e8;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #24292f;
+        }
+        
+        .login-container label {
+            display: block;
+            margin-bottom: 5px;
+            color: #24292f;
+            width: 100%;
+        }
+        
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0366d6;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .login-container button:hover {
+            background-color: #024d9f;
+        }
+
+        error {
+            color: red;
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .footer {
+            background-color: #f6f8fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e1e4e8;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer img {
+            max-height: 30px;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#admin-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const adminName = document.querySelector('#adminName').value;
+                const adminPassword = document.querySelector('#adminPassword').value;
+
+                const body = JSON.stringify({ adminName, adminPassword });
+
+                try {
+                    const loginFetch = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        body,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const loginResult = await loginFetch.text();
+
+                    if (loginFetch.ok && loginResult === 'login success') {
+                        location.href = '/admin/panel';
+                    } else {
+                        document.querySelector('error').innerText = '<%= lang["incorrectlogin"] %>';
+                    }
+                } catch (error) {
+                    document.querySelector('error').innerText = '<%= lang["incorrectlogin"] %>';
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h2><%= lang['adminlogin'] %></h2>
+        <form id="admin-form">
+            <label for="adminName"><%= lang['adminname'] %></label>
+            <input type="text" id="adminName" name="adminName" required>
+            
+            <label for="adminPassword"><%= lang['adminpassword'] %></label>
+            <input type="password" id="adminPassword" name="adminPassword" required>
+            
+            <button type="submit"><%= lang['login'] %></button>
+            <error></error>
+        </form>
+    </div>
+
+    <div class="footer">
+        <p>&copy; Licensed under <a href="<%= wikiLicenseURL %>"><%= wikiLicense %></a></p>
+        <a href="https://github.com/JuniorSchueller/SCHWiki"><img style="width: 88px;height: 31px;" src="/assets/PoweredBy_SCHWiki.png" alt="Powered by SCHWiki"></a>
+    </div>
+</body>
+</html>

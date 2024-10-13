@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= lang['editor'] %> - <%= wikiName %></title>
+    <link rel="shortcut icon" href="<%= wikiIcon %>" type="image/svg">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+        }
+
+        .sidebar {
+            background-color: #24292f;
+            width: 250px;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 1050;
+        }
+
+        .sidebar h1 {
+            color: #fff;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 10px;
+            color: #d1d5da;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #0366d6;
+            color: #fff;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .content-inner {
+            padding-top: 60px;
+        }
+
+        .ref {
+            font-size: small;
+            display: inline;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .ref:hover {
+            text-decoration: underline;
+        }
+
+        .top-navbar {
+            background-color: #0366d6;
+            color: #fff;
+            padding: 10px 20px;
+            position: fixed;
+            width: calc(100% - 250px);
+            top: 0;
+            left: 250px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toolbar {
+            background-color: #f6f8fa;
+            text-align: center;
+            justify-content: center;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .toolbar .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .toolbar .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f1f1f1;
+            min-width: 100px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .toolbar .dropdown-content a {
+            color: black;
+            padding: 5px 10px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .toolbar .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .toolbar .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .toolbar button {
+            background-color: #0366d6;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .toolbar button:hover {
+            background-color: #024d9f;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0366d6;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+
+        button:hover {
+            background-color: #024d9f;
+        }
+
+        button.red {
+            background-color: #d60303;
+        }
+
+        button.red:hover {
+            background-color: #9f0202;
+        }
+
+        .footer {
+            background-color: #f6f8fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e1e4e8;
+            position: fixed;
+            bottom: 0;
+            width: calc(100% - 250px);
+            left: 250px;
+        }
+
+        .footer img {
+            max-height: 30px;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #333;
+            background-color: #fff;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        textarea#editor {
+            min-height: 200px
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        textarea:focus {
+            border-color: #0366d6;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 54, 102, 0.5);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1><%= wikiName %></h1>
+        <% articles.forEach(function(article) { %>
+            <a href="/wiki/<%= article.articleName %>">
+                <%= article.articleName %>
+            </a>
+        <% }); %>
+    </div>
+
+    <div class="top-navbar">
+        <div>
+            <h1><%= lang['editor'] %></h1>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="content-inner">
+            <input type="text" id="aName" placeholder="<%= lang['articlename'] %>" value="<%= articleName %>">
+            
+            <div class="toolbar">
+                <button onclick="addTag('bold')"><i class="fas fa-bold"></i></button>
+                <button onclick="addTag('italic')"><i class="fas fa-italic"></i></button>
+                <div class="dropdown">
+                    <button><i class="fas fa-heading"></i></button>
+                    <div class="dropdown-content">
+                        <a href="#" onclick="addTag('h1'); return false;"><%= lang['title'] %></a>
+                        <a href="#" onclick="addTag('h2'); return false;"><%= lang['header'] %></a>
+                        <a href="#" onclick="addTag('h3'); return false;"><%= lang['subtitle'] %> 1</a>
+                        <a href="#" onclick="addTag('h4'); return false;"><%= lang['subtitle'] %> 2</a>
+                        <a href="#" onclick="addTag('h5'); return false;"><%= lang['subtitle'] %> 3</a>
+                        <a href="#" onclick="addTag('h6'); return false;"><%= lang['subtitle'] %> 4</a>
+                    </div>
+                </div>
+                <button onclick="addTag('image')"><i class="fas fa-image"></i></button>
+                <button onclick="addTag('link')"><i class="fas fa-link"></i></button>
+                <button onclick="addTag('citation')"><i class="fas fa-quote-right"></i></button>
+                <button onclick="addTag('ul')"><i class="fas fa-list-ul"></i></button>
+                <button onclick="addTag('ol')"><i class="fas fa-list-ol"></i></button>
+                <button onclick="addTag('table')"><i class="fas fa-table"></i></button>
+            </div>
+
+            <textarea id="editor" placeholder="<%= lang['articlecontent'] %>"><%= articleContent %></textarea>
+
+            <button onclick="saveArticle()"><%= lang['save'] %></button>
+            <button onclick="previewWikitext()"><%= lang['preview'] %></button>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; <%= lang['licensedunder'] %> <a href="<%= wikiLicenseURL %>"><%= wikiLicense %></a></p>
+        <a href="https://github.com/JuniorSchueller/SCHWiki"><img style="width: 88px;height: 31px;" src="/assets/PoweredBy_SCHWiki.png" alt="Powered by SCHWiki"></a>
+    </div>
+
+    <script>
+        function addTag(tag) {
+            const textarea = document.getElementById('editor');
+            const text = textarea.value;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = text.substring(start, end);
+            let newText;
+    
+            switch(tag) {
+                case 'bold':
+                    newText = `'''${selectedText}'''`;
+                    break;
+                case 'italic':
+                    newText = `''${selectedText}''`;
+                    break;
+                case 'h1':
+                    newText = `= ${selectedText} =`;
+                    break;
+                case 'h2':
+                    newText = `== ${selectedText} ==`;
+                    break;
+                case 'h3':
+                    newText = `=== ${selectedText} ===`;
+                    break;
+                case 'h4':
+                    newText = `==== ${selectedText} ====`;
+                    break;
+                case 'h5':
+                    newText = `===== ${selectedText} =====`;
+                    break;
+                case 'h6':
+                    newText = `====== ${selectedText} ======`;
+                    break;
+                case 'image':
+                    newText = `[[Image:${selectedText}|Title|widthpx|heightpx]]`;
+                    break;
+                case 'link':
+                    newText = `[[${selectedText}|Link Text]]`;
+                    break;
+                case 'citation':
+                    newText = `<ref>${selectedText}</ref>`;
+                    break;
+                case 'ul':
+                    newText = `* ${selectedText}`;
+                    break;
+                case 'ol':
+                    newText = `# ${selectedText}`;
+                    break;
+                case 'table':
+                    newText = `{|\n|-\n| Header 1\n| Header 2\n|-\n| Data 1\n| Data 2\n|}`;
+                    break;
+                default:
+                    newText = selectedText;
+            }
+    
+            textarea.value = text.substring(0, start) + newText + text.substring(end);
+            textarea.focus();
+            textarea.selectionStart = start;
+            textarea.selectionEnd = start + newText.length;
+        }
+       
+        async function previewWikitext() {
+            const wikitext = document.getElementById('editor').value;
+            
+            const textParsed = await fetch(`/api/wikitext`, {
+                method: 'POST',
+                body: JSON.stringify({wikitext}),
+                headers: {'content-type': 'application/json'}
+            });
+
+            const html = await textParsed.text();;
+            const previewWindow = window.open('', 'Preview', 'width=800,height=600');
+            previewWindow.document.write('<html><head><style>body{font-family: Arial;}</style><title>Preview</title></head><body>');
+            previewWindow.document.write(html);
+            previewWindow.document.write('</body></html>');
+            previewWindow.document.close();
+        }
+        async function saveArticle() {
+            const url = new URLSearchParams(location.search);
+
+            let fetchUrl = '/admin/save';
+
+            if (url.has('id')) {
+                fetchUrl += '?id=' + url.get('id');
+            }
+
+            const articleName = document.querySelector('#aName').value;
+            const articleContent = document.querySelector('#editor').value;
+
+            const body = {
+                articleName,
+                articleContent
+            }
+
+            fetch(fetchUrl, {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify(body)
+            })
+                .then(response => {
+                    if (response.ok) return location.href = '/admin/articles';
+                    return window.alert(`<%= lang['somethingbroke'] %>`); 
+                })
+                .catch(() => {
+                    return window.alert(`<%= lang['somethingbroke'] %>`);
+                });
+        }
+    </script>
+</body>
+</html>

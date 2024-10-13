@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= articleName %> - <%= wikiName %></title>
+    <link rel="shortcut icon" href="<%= wikiIcon %>" type="image/svg">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+        }
+
+        .sidebar {
+            background-color: #24292f;
+            width: 250px;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 1050;
+        }
+
+        .sidebar h1 {
+            color: #fff;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 10px;
+            color: #d1d5da;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #0366d6;
+            color: #fff;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .content-inner {
+            padding-top: 60px;
+        }
+
+        .ref {
+            font-size: small;
+            display: inline;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .ref:hover {
+            text-decoration: underline;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+        }
+
+        .top-navbar {
+            background-color: #0366d6;
+            color: #fff;
+            padding: 10px 20px;
+            position: fixed;
+            width: calc(100% - 250px);
+            top: 0;
+            left: 250px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer {
+            background-color: #f6f8fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e1e4e8;
+            position: fixed;
+            bottom: 0;
+            width: calc(100% - 250px);
+            left: 250px;
+        }
+
+        .footer img {
+            max-height: 30px;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1><%= wikiName %></h1>
+        <% articles.forEach(function(article) { %>
+            <a href="/wiki/<%= article.articleName %>">
+                <%= article.articleName %>
+            </a>
+        <% }); %>
+    </div>
+
+    <div class="top-navbar">
+        <div>
+            <h1><%= articleName %></h1>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="content-inner">
+            <p><%- articleContent %></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; <%= lang['licensedunder'] %> <a href="<%= wikiLicenseURL %>"><%= wikiLicense %></a></p>
+        <a href="https://github.com/JuniorSchueller/SCHWiki"><img style="width: 88px;height: 31px;" src="/assets/PoweredBy_SCHWiki.png" alt="Powered by SCHWiki"></a>
+    </div>
+</body>
+</html>

@@ -12,7 +12,7 @@ function formatDate() {
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
-let articles = [];
+var articles = [];
 let isRestoring = false;
 
 /**
@@ -24,20 +24,25 @@ let isRestoring = false;
 async function restoreArticles() {
     try {
         isRestoring = true;
-        const response = await fetch(`${config.wikiDatabaseURL}/articles/.json`);
-        const data = await response.text();
+        const newDataReq = await fetch(config.wikiDatabaseURL + '/articles/.json');
+        const newData = await newDataReq.text();
 
-        if (data === 'null') {
-            console.log(`No articles found. - ${formatDate()}`);
+        if (newData === 'null') {
+            isRestoring = false;
+            return console.log(`No articles found. - ${formatDate()}`);
         } else {
-            articles = JSON.parse(data);
+            const newDataJson = JSON.parse(newData);
+
+            articles.length = 0;
+            newDataJson.forEach(article => {
+                articles.push(article);
+            });
+            isRestoring = false;
             console.log(`Article list restored successfully - ${formatDate()}`);
         }
-    } catch (error) {
-        console.error(`Error during restoring article list - ${formatDate()}`, error);
+    } catch {
+        console.log(`Error during restoring article list - ${formatDate()}`);
         setTimeout(restoreArticles, 1000);
-    } finally {
-        isRestoring = false;
     }
 }
 restoreArticles();
@@ -51,16 +56,20 @@ restoreArticles();
 async function updateArticlesInDB() {
     if (isRestoring) return;
     try {
-        await fetch(`${config.wikiDatabaseURL}/articles/.json`, {
+        await fetch(config.wikiDatabaseURL + '/articles/.json', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(articles),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(articles)
         });
         console.log(`Database article list updated successfully - ${formatDate()}`);
-    } catch (error) {
-        console.error(`Fail during database article list update - ${formatDate()}`, error);
+    } catch {
+        console.log(`Fail during database article list update - ${formatDate()}`);
     }
 }
+
+// article data retrieving
 
 /**
  * Gets the article ID by its name.
@@ -71,7 +80,40 @@ async function updateArticlesInDB() {
  * @description Searches the articles array for an article by its name and returns its index.
  */
 function getArticleIDbyName(articleName) {
-    return articles.findIndex(article => article.articleName === articleName) || null;
+    try {
+        let articleFound = false;
+        let articleID;
+        for (let i = 0; i < articles.length; i++) {
+            if (articles[i].articleName === articleName) {
+                articleFound = true;
+                articleID = i;
+                break;
+            }
+        }
+        if (articleFound) {
+            return articleID;
+        } else {
+            return null;
+        }
+    } catch {
+        console.log(`Error during returning article id - ${formatDate()}`);
+        return null;
+    }
+}
+
+/**
+ * Retrieves the articles list.
+ * @returns {object|null} The articles object or null if there are no articles.
+ * @example
+ * const articles = getArticles();
+ * @description Returns the articles object.
+ */
+function getArticles() {
+    try {
+        return articles;
+    } catch {
+        console.log(`Error during retrieving articles list - ${formatDate()}`);
+    }
 }
 
 /**
@@ -83,7 +125,11 @@ function getArticleIDbyName(articleName) {
  * @description Returns the article object at the specified index.
  */
 function getArticle(articleId) {
-    return articles[articleId] || null;
+    try {
+        return articles[articleId];
+    } catch {
+        console.log(`Error during retrieving article data - ${formatDate()}`);
+    }
 }
 
 /**
@@ -95,7 +141,17 @@ function getArticle(articleId) {
  * @description Returns the n most recently added articles.
  */
 function getLatestArticles(n = 3) {
-    return articles.slice(-n).map(({ articleName, visits }) => ({ articleName, visits }));
+    try {
+        const latestArticlesSlice = articles.slice(-n);
+        const latestArticles = latestArticlesSlice.map(article => ({
+            articleName: article.articleName,
+            visits: article.visits
+        }));
+        return latestArticles;
+    } catch (error) {
+        console.log(`Error during returning latest articles - ${formatDate()}`);
+        return [];
+    }
 }
 
 /**
@@ -107,8 +163,20 @@ function getLatestArticles(n = 3) {
  * @description Returns the n articles with the highest visit counts.
  */
 function getMostPopularArticles(n = 3) {
-    return [...articles].sort((a, b) => b.visits - a.visits).slice(0, n).map(({ articleName, visits }) => ({ articleName, visits }));
+    try {
+        const sortedArticles = articles.slice().sort((a, b) => b.visits - a.visits);
+        const mostPopularArticles = sortedArticles.slice(0, n).map(article => ({
+            articleName: article.articleName,
+            visits: article.visits
+        }));
+        return mostPopularArticles;
+    } catch (error) {
+        console.log(`Error during returning most popular articles - ${formatDate()}`);
+        return [];
+    }
 }
+
+// article management
 
 /**
  * Adds a new article.
@@ -119,10 +187,18 @@ function getMostPopularArticles(n = 3) {
  * @description Creates a new article and adds it to the articles list, then updates the database.
  */
 function addArticle(articleName, articleContent) {
-    const newArticle = { articleName, articleContent, visits: 0 };
-    articles.push(newArticle);
-    updateArticlesInDB();
-    console.log(`Article "${articleName}" created - ${formatDate()}`);
+    try {
+        const newArticle = {
+            articleName,
+            articleContent,
+            'visits': 0
+        };
+        articles.push(newArticle);
+        updateArticlesInDB();
+        console.log(`Article "${articleName}" created - ${formatDate()}`);
+    } catch {
+        console.log(`Error during article creation - ${formatDate()}`);
+    }
 }
 
 /**
@@ -137,8 +213,6 @@ function remArticle(articleId) {
         articles.splice(articleId, 1);
         updateArticlesInDB();
         console.log(`Article ${articleId} removed - ${formatDate()}`);
-    } else {
-        console.error(`Invalid article ID - ${formatDate()}`);
     }
 }
 
@@ -151,14 +225,17 @@ function remArticle(articleId) {
  * @description Updates the article's name and content, then updates the database.
  */
 function saveArticle(articleId, newData) {
-    if (articleId >= 0 && articleId < articles.length) {
-        articles[articleId] = { ...articles[articleId], ...newData };
+    try {
+        articles[articleId].articleName = newData.articleName;
+        articles[articleId].articleContent = newData.articleContent;
         updateArticlesInDB();
         console.log(`Article "${newData.articleName}" updated - ${formatDate()}`);
-    } else {
-        console.error(`Invalid article ID - ${formatDate()}`);
+    } catch {
+        console.log(`Error during article update - ${formatDate()}`);
     }
 }
+
+// visits
 
 /**
  * Gets the total number of visits across all articles.
@@ -168,7 +245,16 @@ function saveArticle(articleId, newData) {
  * @description Sums up the visits from all articles.
  */
 function getTotalVisits() {
-    return articles.reduce((total, article) => total + article.visits, 0);
+    try {
+        let totalVisits = 0;
+        for (let i = 0; i < articles.length; i++) {
+            totalVisits += articles[i].visits;
+        }
+        return totalVisits;
+    } catch {
+        console.log(`Error during retrieving total article visits - ${formatDate()}`);
+        return 0;
+    }
 }
 
 /**
@@ -179,13 +265,9 @@ function getTotalVisits() {
  * @description Increments the visit count for the specified article and updates the database.
  */
 function addVisit(articleId) {
-    if (articleId >= 0 && articleId < articles.length) {
-        articles[articleId].visits++;
-        updateArticlesInDB();
-        console.log(`Visit to article ${articleId} added - ${formatDate()}`);
-    } else {
-        console.error(`Invalid article ID - ${formatDate()}`);
-    }
+    articles[articleId].visits += 1;
+    updateArticlesInDB();
+    console.log(`Visit to article ${articleId} added - ${formatDate()}`);
 }
 
 /**
@@ -196,13 +278,9 @@ function addVisit(articleId) {
  * @description Decrements the visit count for the specified article and updates the database.
  */
 function remVisit(articleId) {
-    if (articleId >= 0 && articleId < articles.length) {
-        articles[articleId].visits--;
-        updateArticlesInDB();
-        console.log(`Visit to article ${articleId} removed - ${formatDate()}`);
-    } else {
-        console.error(`Invalid article ID - ${formatDate()}`);
-    }
+    articles[articleId].visits -= 1;
+    updateArticlesInDB();
+    console.log(`Visit to article ${articleId} removed - ${formatDate()}`);
 }
 
 /**
@@ -212,13 +290,16 @@ function remVisit(articleId) {
  * @description Sets all articles' visit counts to zero and updates the database.
  */
 function resetVisits() {
-    articles.forEach(article => article.visits = 0);
+    for (let i = 0; i < articles.length; i++) {
+        articles[i].visits = 0;
+    }
     updateArticlesInDB();
 }
 
 module.exports = {
     articles,
     getArticleIDbyName,
+    getArticles,
     getArticle,
     getLatestArticles,
     getMostPopularArticles,

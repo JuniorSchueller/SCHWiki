@@ -47,7 +47,8 @@ function decrypt(text, key) {
         decrypted += decipher.final('utf8');
 
         return decrypted;
-    } catch {
+    } catch(err) {
+        console.log(err);
         console.log('Error during decryption.');
         return null;
     }
@@ -179,7 +180,8 @@ app.get('/admin', (req, res) => {
                 res.redirect('/admin/panel');
             }
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });
@@ -210,7 +212,8 @@ app.get('/admin/panel', (req, res) => {
                 res.render('panel', artParams);
             }
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });
@@ -238,7 +241,8 @@ app.get('/admin/articles', (req, res) => {
                 res.render('articles', artParams);
             }
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });
@@ -283,14 +287,15 @@ app.get('/admin/editor', (req, res) => {
                 }
             }
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });
 
 app.get(['/','/wiki','/wiki/'], (req, res) => {
     try {
-        const articles = database.articles;
+        const articles = database.getArticles();
 
         if (articles.length > 0) {
             res.redirect(`/wiki/${articles[0].articleName}`);
@@ -308,7 +313,8 @@ app.get(['/','/wiki','/wiki/'], (req, res) => {
             };
             res.render('wiki', artParams);
         }
-    } catch {
+    } catch(err) {
+		console.log(err);
         return res.status(500).send();
     }
 });
@@ -316,7 +322,7 @@ app.get(['/','/wiki','/wiki/'], (req, res) => {
 app.get('/wiki/:articleName', (req, res) => {
     try {
         const articleName = req.params.articleName;
-        const articles = database.articles;
+        const articles = database.getArticles();
         const article = articles.find(a => a.articleName === articleName);
 
         if (article) {
@@ -349,7 +355,8 @@ app.get('/wiki/:articleName', (req, res) => {
             };
             res.render('wiki', artParams);
         }
-    } catch {
+    } catch(err) {
+		console.log(err);
         return res.status(500).send();
     }
 });
@@ -380,7 +387,8 @@ app.post('/api/admin/login', (req, res) => {
         } else {
             res.status(401).send('login fail');
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         res.status(500).send();
     }
 });
@@ -399,7 +407,8 @@ app.post('/admin/delete', async (req, res) => {
                 res.status(200).send();
             }
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });
@@ -417,7 +426,8 @@ app.post('/admin/resetvisits', async (req, res) => {
                 res.status(200).send();
             }
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });
@@ -447,7 +457,8 @@ app.post('/admin/save', async (req, res) => {
                 }
             }
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });
@@ -457,7 +468,8 @@ app.post('/api/wikitext', (req, res) => {
         const { wikitext } = req.body;
 
         return res.send(parseWikitext(wikitext));
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });
@@ -471,7 +483,8 @@ app.get('/assets/:fileName', (req, res) => {
         } else {
             return res.status(404).send('File not found.');
         }
-    } catch {
+    } catch(err) {
+        console.log(err);
         return res.status(500).send();
     }
 });

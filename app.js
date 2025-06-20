@@ -361,6 +361,49 @@ app.get('/wiki/:articleName', (req, res) => {
     }
 });
 
+app.get('/search', (req, res) => {
+    try {
+        const query = req.query.q;
+        const articles = database.getArticles();
+        const langPack = lang[config['wikiLanguage']];
+
+        if (!query || query.trim() === '') {
+            return res.render('search', {
+                wikiIcon: config['wikiIcon'],
+                wikiName: config['wikiName'],
+                wikiDescription: config['wikiDescription'],
+                wikiLicense: config['wikiLicense'],
+                wikiLicenseURL: config['wikiLicenseURL'],
+                searchQuery: '',
+                searchResults: [],
+                articles: articles,
+                lang: langPack
+            });
+        }
+
+        const keywords = query.toLowerCase().split(/\s+/);
+        const results = articles.filter(article => {
+            const content = `${article.articleName} ${article.articleContent}`.toLowerCase();
+            return keywords.some(word => content.includes(word));
+        });
+
+        res.render('search', {
+            wikiIcon: config['wikiIcon'],
+            wikiName: config['wikiName'],
+            wikiDescription: config['wikiDescription'],
+            wikiLicense: config['wikiLicense'],
+            wikiLicenseURL: config['wikiLicenseURL'],
+            searchQuery: query,
+            searchResults: results,
+            articles: articles,
+            lang: langPack
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send();
+    }
+});
+
 // API
 
 app.post('/api/admin/login', (req, res) => {
@@ -491,5 +534,5 @@ app.get('/assets/:fileName', (req, res) => {
 
 app.listen(3300, () => {
     console.log('Wiki started on port 3300.\n\nhttp://localhost:3300/wiki\nhttp://localhost:3300/admin');
-    require('child_process').exec('start http://localhost:3300/');
+    //require('child_process').exec('start http://localhost:3300/');
 });

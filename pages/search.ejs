@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= lang['controlpanel'] %> - <%= wikiName %></title>
+    <title><%= searchQuery %> - <%= wikiName %></title>
     <link rel="shortcut icon" href="<%= wikiIcon %>" type="image/svg">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -59,17 +58,6 @@
             padding-top: 60px;
         }
 
-        .ref {
-            font-size: small;
-            display: inline;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .ref:hover {
-            text-decoration: underline;
-        }
-
         .top-navbar {
             background-color: #0366d6;
             color: #fff;
@@ -82,83 +70,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        #default {
-            color: white;
-            text-decoration: none;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #0366d6;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 2px;
-            margin-bottom: 2px;
-        }
-
-        button:hover {
-            background-color: #024d9f;
-        }
-
-        button.red {
-            background-color: #d60303;
-        }
-
-        button.red:hover {
-            background-color: #9f0202;
-        }
-
-        .article-list {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .article-list li {
-            background-color: #ffffff;
-            border: 1px solid #e1e4e8;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .article-list a {
-            color: #0366d6;
-            text-decoration: none;
-        }
-
-        .article-list a:hover {
-            text-decoration: underline;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .actions a {
-            color: #0366d6;
-            text-decoration: none;
-            font-size: 16px;
-        }
-
-        .actions a:hover {
-            color: #024d9f;
-        }
-
-        .visitsCount {
-            color: #6a737d;
-            font-size: 0.9em;
-            margin-left: 5px;
         }
 
         .footer {
@@ -181,6 +92,26 @@
         .footer p {
             margin: 0;
         }
+
+        .search-result {
+            margin-bottom: 15px;
+        }
+
+        .search-result a {
+            font-weight: bold;
+            font-size: 1.1em;
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        .search-result a:hover {
+            text-decoration: underline;
+        }
+
+        .no-results {
+            color: #666;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -195,7 +126,7 @@
 
     <div class="top-navbar">
         <div style="display: flex; align-items: center; gap: 20px; width: 100%; justify-content: space-between;">
-            <h1><a href="/admin/panel" id="default"><%= lang['controlpanel'] %></a> - <%= lang['articles'] %></h1>
+            <h1><%= lang['searchresults'] %></h1>
 
             <form id="searchForm" style="display: flex; align-items: center; gap: 5px;">
                 <input 
@@ -213,57 +144,25 @@
             </form>
         </div>
     </div>
-
     <div class="content">
-        <div class="content-inner"></div>
-        <h1><%= lang['articles'] %></h1>
-
-        <br>
-
-        <ul class="article-list">
-            <a href="/admin/editor"><button><%= lang['createarticle'] %></button><br><br></a>
-            <% for (let i = 0; i < articles.length; i++) { %>
-                <li class="article-item">
-                    <a href="/wiki/<%= articles[i].articleName %>">
-                        <%= articles[i].articleName %> <span class="visitsCount">(<%= articles[i].visits %> <%= lang['visits'].toLowerCase() %>)</span>
-                    </a>
-                    <div class="actions">
-                        <a href="/wiki/<%= articles[i].articleName %>" title="<%= lang['view'] %>">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="/admin/editor?id=<%= i %>" title="<%= lang['edit'] %>">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="#" onclick="deleteArticle(parseInt('<%= i %>'))" title="<%= lang['delete'] %>">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
+        <div class="content-inner">
+            <% if (searchResults.length === 0) { %>
+                <p class="no-results"><%= lang.noresults || 'Nenhum artigo encontrado para' %> "<%= searchQuery %>".</p>
+            <% } else { %>
+                <p><%= searchResults.length %> <%= lang.searchresults || 'resultado(s) encontrado(s)' %>:</p>
+                <% searchResults.forEach(result => { %>
+                    <div class="search-result">
+                        <a href="/wiki/<%= result.articleName %>"><%= result.articleName %></a>
                     </div>
-                </li>
-            <% }; %>
-        </ul>
-        <br><br>
+                <% }) %>
+            <% } %>
+        </div>
     </div>
 
     <div class="footer">
         <p>&copy; <%= lang['licensedunder'] %> <a href="<%= wikiLicenseURL %>"><%= wikiLicense %></a></p>
         <a href="https://github.com/JuniorSchueller/SCHWiki"><img style="width: 88px;height: 31px;" src="/assets/PoweredBy_SCHWiki.png" alt="Powered by SCHWiki"></a>
     </div>
-
-    <script>
-        function deleteArticle(id) {
-            const wasAccepted = window.confirm(`<%= lang['areyousure'] %> `);
-            if (!wasAccepted) return;
-            fetch('/admin/delete?id=' + id, {
-                method: 'POST'
-            })
-                .then(response => {
-                    location.reload();
-                })
-                .catch(() => {
-                    window.alert(`<%= lang['somethingbroke'] %>`)
-                });
-        }
-    </script>
 
     <script>
         document.getElementById('searchForm').addEventListener('submit', function (e) {
